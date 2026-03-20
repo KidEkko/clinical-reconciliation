@@ -2,7 +2,7 @@ from typing import Literal, Any
 from pydantic import BaseModel, Field
 
 
-SafetyCheck = Literal["PASSED", "FLAGGED", "REQUIRES_REVIEW"]
+Rating = Literal["PASSED", "FLAGGED", "REQUIRES_REVIEW"]
 SourceReliability = Literal["high", "medium", "low"]
 
 
@@ -79,7 +79,7 @@ class ReconcileMedicationResponse(BaseModel):
         default_factory=list,
         description="Recommended follow-up actions",
     )
-    clinical_safety_check: SafetyCheck = Field(
+    clinical_safety_check: Rating = Field(
         ...,
         description="High-level safety assessment for the reconciliation result",
     )

@@ -2,6 +2,8 @@ import json
 import os
 
 from openai import OpenAI
+from google import genai
+from google.genai import types
 
 from app.models.reconcile import (
     ReconcileMedicationRequest,
@@ -16,8 +18,10 @@ from app.utils.response_schema import (
     DATA_QUALITY_RESPONSE_SCHEMA
 )
 
+g_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+GPT_MODEL = "gpt-5.4"
 
 def build_reconcile_prompt(payload: ReconcileMedicationRequest) -> str:
     payload_json = json.dumps(payload.model_dump(mode="json"), indent=2)
@@ -43,7 +47,7 @@ Input:
 
 def reconcile_with_llm(
     payload: ReconcileMedicationRequest,
-    model: str = "gpt-4.1",
+    model: str = GPT_MODEL,
 ) -> ReconcileMedicationResponse:
     prompt = build_reconcile_prompt(payload)
 
@@ -63,6 +67,25 @@ def reconcile_with_llm(
     raw_json = response.output_text
     return ReconcileMedicationResponse.model_validate_json(raw_json)
 
+
+def reconcile_with_gemini_llm(
+    payload: ReconcileMedicationRequest,
+    model: str = "gemini-3-flash-preview",
+) -> ReconcileMedicationResponse:
+    prompt = build_reconcile_prompt(payload)
+
+    response = g_client.models.generate_content(
+        model=model,
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            response_mime_type="application/json",
+            response_schema=ReconcileMedicationResponse.model_json_schema(),
+            temperature=0.2,
+        ),
+    )
+
+    raw_json = response.text
+    return ReconcileMedicationResponse.model_validate_json(raw_json)
 
 def build_data_quality_prompt(payload: DataQualityRequest) -> str:
     payload_json = payload.model_dump_json(indent=2)
@@ -103,7 +126,7 @@ Input:
 
 def evaluate_data_quality_with_llm(
     payload: DataQualityRequest,
-    model: str = "gpt-4.1",
+    model: str = GPT_MODEL,
 ) -> DataQualityResponse:
     prompt = build_data_quality_prompt(payload)
 
@@ -121,4 +144,24 @@ def evaluate_data_quality_with_llm(
     )
 
     raw_json = response.output_text
+    return DataQualityResponse.model_validate_json(raw_json)
+
+
+def evaluate_data_quality_with_gemini_llm(
+    payload: DataQualityRequest,
+    model: str = "gemini-3-flash-preview",
+) -> DataQualityResponse:
+    prompt = build_data_quality_prompt(payload)
+
+    response = g_client.models.generate_content(
+        model=model,
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            response_mime_type="application/json",
+            response_schema=DataQualityResponse.model_json_schema(),
+            temperature=0.2,
+        ),
+    )
+
+    raw_json = response.text
     return DataQualityResponse.model_validate_json(raw_json)

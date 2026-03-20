@@ -1,3 +1,4 @@
+# Schemas for OpenAI responses
 
 RECONCILE_RESPONSE_SCHEMA: dict = {
     "type": "object",

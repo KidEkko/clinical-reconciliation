@@ -5,10 +5,12 @@ from app.api.routes.reconcile import router as reconcile_router
 from app.api.routes.data_quality import router as data_quality_router
 
 app = FastAPI(title="Clinical Data Reconciliation Engine")
-
+origins = [
+    "http://localhost:5173", 
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # tighten later for deploy
+    allow_origins=origins,  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
