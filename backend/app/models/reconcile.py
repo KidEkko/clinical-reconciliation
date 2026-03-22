@@ -1,5 +1,6 @@
 from typing import Literal, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+from app.utils.validators import validate_iso_date
 
 
 Rating = Literal["PASSED", "FLAGGED", "REQUIRES_REVIEW"]
@@ -8,8 +9,9 @@ SourceReliability = Literal["high", "medium", "low"]
 
 class PatientContext(BaseModel):
     age: int = Field(
-        ..., 
-        ge=0, 
+        ...,
+        ge=0,
+        le=150,
         description="Patient age in years"
     )
     conditions: list[str] = Field(
@@ -26,8 +28,8 @@ class PatientContext(BaseModel):
 
 class MedicationSource(BaseModel):
     system: str = Field(
-        ..., 
-        min_length=1, 
+        ...,
+        min_length=1,
         description="Name of the source system"
     )
     medication: str = Field(
@@ -47,6 +49,14 @@ class MedicationSource(BaseModel):
         ...,
         description="Relative trust level assigned to the source",
     )
+
+    @field_validator("last_updated", "last_filled")
+    @classmethod
+    def validate_dates(cls, v: str | None) -> str | None:
+        try:
+            return validate_iso_date(v)
+        except ValueError:
+            raise ValueError("Date must be in ISO 8601 format")
 
 
 class ReconcileMedicationRequest(BaseModel):

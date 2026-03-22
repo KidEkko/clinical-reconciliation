@@ -1,5 +1,6 @@
 from typing import Literal, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict, field_validator
+from app.utils.validators import validate_iso_date
 
 SeverityScale = Literal["high", "medium", "low"]
 
@@ -20,6 +21,14 @@ class Demographics(BaseModel):
         description="Patient Gender",
     )
 
+    @field_validator("dob")
+    @classmethod
+    def validate_dob(cls, v: str | None) -> str | None:
+        try:
+            return validate_iso_date(v)
+        except ValueError:
+            raise ValueError("Date of birth must be in ISO 8601 format")
+
 class DataQualityRequest(BaseModel):
     demographics: Demographics
     medications: list[str] = Field(
@@ -32,19 +41,29 @@ class DataQualityRequest(BaseModel):
     )
     conditions: list[str] = Field(
         default_factory=list,
-        description="List of knwon patient conditions",
+        description="List of known patient conditions",
     )
     vital_signs: dict[str, Any] = Field(
         default_factory=dict,
         description="Patient vital signs as key/value pairs",
     )
     last_updated: str | None = Field(
-        None, 
+        None,
         min_length=1,
         description="Date of most recent update to patient records",
     )
 
+    @field_validator("last_updated")
+    @classmethod
+    def validate_last_updated(cls, v: str | None) -> str | None:
+        try:
+            return validate_iso_date(v)
+        except ValueError:
+            raise ValueError("Last updated must be in ISO 8601 format")
+
 class DataQualityBreakdown(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     completeness: int = Field(
         ...,
         ge=0,
@@ -64,11 +83,11 @@ class DataQualityBreakdown(BaseModel):
         # TODO: update this
         description="Recency of data",
     )
-    clinical_plausability: int = Field(
+    clinical_plausibility: int = Field(
         ...,
         ge=0,
         le=100,
-        description="Overall confidence score for data quality",
+        description="Clinical plausibility and coherence of the data",
     )
 
 class DataQualityIssue(BaseModel):
@@ -98,5 +117,5 @@ class DataQualityResponse(BaseModel):
     breakdown: DataQualityBreakdown
     issues_detected: list[DataQualityIssue] = Field(
         default_factory=list,
-        description="List of knwon patient conditions",
+        description="List of known patient conditions",
     )

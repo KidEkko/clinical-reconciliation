@@ -2,4 +2,8 @@ fastapi
 uvicorn
 pydantic
 python-dotenv
-openai
+google-genai
+pytest
+pytest-asyncio
+pytest-mock
+httpx
