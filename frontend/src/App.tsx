@@ -1,100 +1,126 @@
-import React, { useCallback, useState } from "react"; 
+import { useCallback, useState } from "react";
+
+import { DataQualityCard, EmptyState, ReconciliationCard } from "./components/cards";
+import { DataQualitySkeleton, ReconciliationSkeleton } from "./components/skeletons";
+import TabNav from "./components/TabNav";
 import { Button } from "./components/ui/button";
-import "@/App.css"
-import { useLoading, useReturns } from "./generic/customHooks";
 import JsonUpload from "./components/upload";
-import { DataQualityCard, ReconciliationCard, Skeletons } from "./components/cards";
+import { useReturns } from "./generic/customHooks";
+import { mockDataQualityResponses, mockReconciliationResponses } from "./generic/mockData";
+import { Tab, TabConfig } from "./generic/tabs";
 
-// Overcomplicated for this basic of a project, but what I'm used to.
-enum Tab {
-  Reconciliation = 0,
-  DataQuality
-}
-
-const TabMap = new Map([
-  [Tab.Reconciliation, "reconcile"],
-  [Tab.DataQuality, "quality"]
-])
-
-/**
- * submit functions for both types
- * components for uploading files and displaying data
- * display data component look:
- * card. rounded border with light shadow style.
- * red/yellow/green color scheme somewhere. could be a small circle next to the confidence score in the upper right.. actually yes that
- * patient name in top left. "John Doe" by default if not provided for data quality. --- ask maybe?
- * actually nah, default john doe, unknown DOB and gender
- * reasoning and recommended actions
- * 0-50 red, 51-75 yellow, up green
- * accept/reject buttons on top right. edit button replaces both on accept, resend option if reject. Initial version will just call it again, ideally use a different prompt or smth?
- * save patient contexts to response objects to enable saving and searching.
- * pagination for things: issues, recommended actions, cards in general.
- * 
- * save some kind of ID for each request? probably ideal for a real practice
- * 
- * 
- */
+import "@/App.css";
 
 export default function App() {
-  const [tab, setTab] = useState<Tab>(0);
-  const [submitting, setSubmitting] = useState<boolean>(false);
-  const { loading, startLoading, stopLoading } = useLoading(false);
-  const { reconciliations, dataQualities } = useReturns();
+  const [tab, setTab] = useState<Tab>(Tab.Reconciliation); 
+  const { reconciliations, dataQualities, updateReconciliations, updateDataQualities, updateReconciliationStatus, updateDataQualityStatus, isSubmitting } = useReturns();
 
-  const swapTab = useCallback((tabToSwapTo: Tab) => (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (submitting || loading) {
-      return;
-    }
-    // reset any/all forms
-    setTab(tabToSwapTo);
-  }, [submitting, loading]);
+  const showDevTools = import.meta.env.VITE_SHOW_DEV_TOOLS === 'true';
+
+  const tabs = [
+    { label: TabConfig[Tab.Reconciliation].label, value: Tab.Reconciliation },
+    { label: TabConfig[Tab.DataQuality].label, value: Tab.DataQuality },
+  ];
+
+  const handleTabChange = useCallback((tabValue: number) => {
+    if (isSubmitting) return;
+    
+    setTab(tabValue);
+  }, [isSubmitting]);
+
+  const loadExampleData = useCallback(() => {
+    mockReconciliationResponses.forEach(mock => {
+      updateReconciliations(mock);
+    });
+    mockDataQualityResponses.forEach(mock => {
+      updateDataQualities(mock);
+    });
+  }, [tab, updateReconciliations, updateDataQualities]);
 
   const reconciliationMap = useCallback(() => {
-    if (reconciliations.length === 0) {
-      return <Skeletons />
+    if (reconciliations.length === 0 && !isSubmitting) {
+      return <EmptyState config={TabConfig[Tab.Reconciliation]} />
     }
-    return reconciliations.map((reconciliation) => (<ReconciliationCard data={reconciliation} />))
-  }, [reconciliations])
+    return (
+      <div className="flex flex-col gap-4 py-10">
+        {isSubmitting && (
+          <ReconciliationSkeleton key="loading" />
+        )}
+        {reconciliations.map((reconciliation, index) => (
+          <ReconciliationCard
+            key={index}
+            data={reconciliation}
+            onAccept={() => updateReconciliationStatus(index, "accepted")}
+            onReject={() => updateReconciliationStatus(index, "rejected")}
+          />
+        ))}
+      </div>
+    )
+  }, [reconciliations, updateReconciliationStatus, isSubmitting, tab])
 
   const dataQualitiesMap = useCallback(() => {
-    if (dataQualities.length === 0) {
-      return <Skeletons />
+    if (dataQualities.length === 0 && !isSubmitting) {
+      return <EmptyState config={TabConfig[Tab.DataQuality]} />
     }
-    return dataQualities.map((dataQuality) => (<DataQualityCard data={dataQuality} />))
-  }, [reconciliations])
+    return (
+      <div className="flex flex-col gap-4 py-10">
+        {isSubmitting && (
+          <DataQualitySkeleton key="loading" />
+        )}
+        {dataQualities.map((dataQuality, index) => (
+          <DataQualityCard
+            key={index}
+            data={dataQuality}
+            onAccept={() => updateDataQualityStatus(index, "accepted")}
+            onReject={() => updateDataQualityStatus(index, "rejected")}
+          />
+        ))}
+      </div>
+    )
+  }, [dataQualities, updateDataQualityStatus, isSubmitting, tab])
 
   return (
-    <body className="max-w-7xl bg-inherit h-full mx-auto py-12 lg:py-24 border-x border-white dark:border-black">
-      <h1>Data Reconciliation</h1>
-      <div className="w-full mx-auto  border-t border-black">
+    <div className="max-w-7xl lg:min-w-7xl bg-background min-h-screen mx-auto pt-8 lg:pt-16 border-x border-border">
+      <div className="flex items-center justify-between mb-8 px-4 lg:px-8">
+        <h1 className="text-left text-3xl font-semibold tracking-tight text-destructive">Clinical Data Reconciliation</h1>
+        {showDevTools && (
+          <Button
+            onClick={loadExampleData}
+            variant="outline"
+            size="sm"
+            className="shadow-lift"
+          >
+            Load Example Data
+          </Button>
+        )}
+      </div>
 
-        <div className="flex mb-24 px-6 lg:px-12 space-x-2">
-          <Button className="bShad rounded-2xl border border-black " 
-            disabled={loading} 
-            onClick={swapTab(Tab.Reconciliation)}
-          >
-            Medication Reconciliation
-          </Button>
-          <Button className="bShad rounded-2xl border border-black" 
-            disabled={loading} 
-            onClick={swapTab(Tab.DataQuality)}
-          >
-            Data Quality Validation
-          </Button>
+      <div className="w-full mx-auto">
+        <div className="border-b-2 border-border px-4 lg:px-8">
+          <TabNav
+            tabs={tabs}
+            activeTab={tab}
+            onTabChange={handleTabChange}
+            disabled={isSubmitting}
+          />
         </div>
-        {reconciliations.map((rec) => (<><div>rec.medication</div></>))}
 
-        <div className="flex lg:flex-row justify-center">
-          <div className="flex h-full my-auto border-r dark:border-black border-amber-300 self-start">
-            <JsonUpload tab={tab}/>
+        <div className="flex flex-col lg:flex-row gap-6 px-4 lg:px-8">
+          <div className="w-full lg:w-auto lg:max-w-100 lg:border-r border-border pr-0 lg:pr-6 lg:min-h-[calc(100vh-11rem)]">
+            <div className="lg:sticky lg:top-6">
+              <JsonUpload tab={tab}/>
+            </div>
           </div>
+          <div className="flex-1 min-w-0">
             {
-              TabMap.get(tab) === "reconcile" ? 
-                reconciliationMap() : 
+              TabConfig[tab].key === "reconcile" ?
+                reconciliationMap()
+                :
                 dataQualitiesMap()
             }
+          </div>
         </div>
       </div>
-    </body>
+    </div>
   );
 }

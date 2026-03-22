@@ -1,0 +1,22 @@
+{
+  "demographics": {
+    "name": "John Doe",
+    "dob": "",
+    "gender": "M"
+  },
+  "medications": [
+    "aspirin",
+    "some blood pressure med"
+  ],
+  "allergies": [],
+  "conditions": [
+    "HTN",
+    "DM"
+  ],
+  "vital_signs": {
+    "blood_pressure": "180/110 mmHg",
+    "heart_rate": "145 bpm",
+    "temperature": "103.2 F"
+  },
+  "last_updated": "2023-08-15T14:20:00Z"
+}

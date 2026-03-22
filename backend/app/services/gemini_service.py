@@ -25,8 +25,9 @@ logger = get_logger(__name__)
 g_client = genai.Client(api_key=settings.GEMINI_API_KEY)
 
 GEMINI_MODELS = [
-    "gemini-2.0-flash-exp",
-    "gemini-1.5-flash",
+    "gemini-3.1-flash-lite-preview",
+    "gemini-2.5-flash",
+    "gemini-2.0-flash",
 ]
 
 _cache = SimpleCache(

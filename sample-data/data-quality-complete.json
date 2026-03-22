@@ -1,0 +1,29 @@
+{
+  "demographics": {
+    "name": "Sarah Johnson",
+    "dob": "1975-06-12",
+    "gender": "Female"
+  },
+  "medications": [
+    "Lisinopril 20mg once daily",
+    "Metformin 1000mg twice daily",
+    "Atorvastatin 40mg at bedtime"
+  ],
+  "allergies": [
+    "Penicillin (rash)",
+    "Sulfa drugs (hives)"
+  ],
+  "conditions": [
+    "Hypertension",
+    "Type 2 Diabetes Mellitus",
+    "Hyperlipidemia"
+  ],
+  "vital_signs": {
+    "blood_pressure": "128/78 mmHg",
+    "heart_rate": "72 bpm",
+    "temperature": "98.6 F",
+    "respiratory_rate": "16 breaths/min",
+    "oxygen_saturation": "98%"
+  },
+  "last_updated": "2024-03-20T10:30:00Z"
+}

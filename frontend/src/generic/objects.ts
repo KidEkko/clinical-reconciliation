@@ -1,13 +1,13 @@
-enum Reliability {
-  High = "High",
-  Medium = "Medium",
-  Low = "Low"
+export enum Reliability {
+  High = "high",
+  Medium = "medium",
+  Low = "low"
 }
 
-enum Severity {
-  High = "High",
-  Medium = "Medium",
-  Low = "Low"
+export enum Severity {
+  High = "high",
+  Medium = "medium",
+  Low = "low"
 }
 
 export const SeverityMap = new Map([
@@ -16,10 +16,10 @@ export const SeverityMap = new Map([
   [Severity.Low, "green"]
 ])
 
-enum SafetyCheck {
-  Passed = "Passed",
-  Flagged = "Flagged",
-  Review = "Requires Review"
+export enum SafetyCheck {
+  Passed = "PASSED",
+  Flagged = "FLAGGED",
+  Review = "REQUIRES_REVIEW"
 }
 
 export class ApiResponse<T> {
@@ -38,13 +38,16 @@ export class ApiResponse<T> {
   }
 }
 
+export type ReviewStatus = "pending" | "accepted" | "rejected";
+
 export type ReconciliationResponse = {
   patient_context: PatientContext,
   reconciled_medication: string,
   confidence_score: number,
   reasoning: string,
   recommended_actions: string[],
-  clinical_safety_check: SafetyCheck
+  clinical_safety_check: SafetyCheck,
+  status?: ReviewStatus
 }
 
 
@@ -56,7 +59,7 @@ export type ReconciliationRequest = {
 type PatientContext = {
   age: number,
   conditions: string[],
-  recent_labs: Map<string, any>,
+  recent_labs: Record<string, any>,
 }
 
 type Source = {
@@ -72,13 +75,14 @@ export type DataQualityResponse = {
   overall_score: number,
   breakdown: Breakdown,
   issues_detected: DataQualityIssue[],
+  status?: ReviewStatus
 }
 
 type Breakdown = {
   completeness: number,
   accuracy: number,
   timeliness: number,
-  clinical_plausability: number,
+  clinical_plausibility: number,
 }
 
 type DataQualityIssue = {
@@ -92,7 +96,7 @@ export type DataQualityRequest = {
   medications: string[],
   allergies: string[],
   conditions: string[],
-  vital_signs: Map<string, any>,
+  vital_signs: Record<string, any>,
   last_updated: string,
 }
 

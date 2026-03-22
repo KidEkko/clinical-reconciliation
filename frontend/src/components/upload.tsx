@@ -1,17 +1,24 @@
-import { type ReconciliationRequest, type DataQualityRequest } from "@/generic/objects";
-import { AssessDataQuality, ReconcileMedication } from "@/generic/requests";
 import { useState } from "react";
+import { toast } from "sonner";
+
+import type { DataQualityRequest, DataQualityResponse, ReconciliationRequest, ReconciliationResponse } from "@/generic/objects";
+import { useReturns } from "@/generic/customHooks";
+import { AssessDataQuality, ReconcileMedication } from "@/generic/requests";
+import { Tab, TabConfig } from "@/generic/tabs";
+
 import { Button } from "./ui/button";
 
 type UploadProps = {
-  tab: number,
+  tab: Tab,
 
 }
 
 export default function JsonUpload({tab}: UploadProps) {
   const [error, setError] = useState("");
   const [parsedData, setParsedData] = useState<ReconciliationRequest | DataQualityRequest | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { updateReconciliations, updateDataQualities, isSubmitting, setIsSubmitting } = useReturns();
+
+  const config = TabConfig[tab];
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     setError("");
@@ -24,7 +31,7 @@ export default function JsonUpload({tab}: UploadProps) {
       const text = await file.text();
       const json = JSON.parse(text);
       
-      if (tab === 0) {
+      if (tab === Tab.Reconciliation) {
         setParsedData(json as ReconciliationRequest);
       } else {
         setParsedData(json as DataQualityRequest)
@@ -45,10 +52,26 @@ export default function JsonUpload({tab}: UploadProps) {
 
     try {
       let resp;
-      if (tab === 0) {
-        resp = await ReconcileMedication(parsedData as ReconciliationRequest);
+      let isDuplicate = false;
+
+      if (tab === Tab.Reconciliation) {
+        const data = parsedData as ReconciliationRequest
+        resp = await ReconcileMedication(data) as ReconciliationResponse;
+        resp.patient_context = data.patient_context
+        isDuplicate = updateReconciliations(resp);
       } else {
-        resp = await AssessDataQuality(parsedData as DataQualityRequest);
+        const data = parsedData as DataQualityRequest
+        resp = await AssessDataQuality(data) as DataQualityResponse;
+        resp.demographics = data.demographics
+        isDuplicate = updateDataQualities(resp);
+      }
+
+      if (isDuplicate) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        toast.info("Duplicate Request", {
+          description: "This request was already processed and returned from cache."
+        });
       }
 
     } catch {
@@ -59,37 +82,32 @@ export default function JsonUpload({tab}: UploadProps) {
   };
 
   return (
-    <>
-    <div className="flex mx-4 lg:mx-8">
-      <div className="mx-auto max-w-xl rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-semibold text-gray-900">Upload JSON Request</h2>
-        <div className="mt-4">
-          <label className="block text-sm font-medium text-gray-700">JSON file</label>
+    <div className="w-full panel-surface p-6 mt-10">
+      <h2 className="text-xl font-semibold text-destructive mb-1">{config.label}</h2>
+      <div className="mt-2">
+          <label className="block text-sm font-medium text-muted-foreground">JSON file</label>
           <input
             type="file"
             accept=".json,application/json"
             onChange={handleFileChange}
-            className="mt-2 cursor-pointer  block w-full rounded-lg border border-gray-300 p-2 text-sm file:mr-4 file:rounded-md file:border-0 file:bg-gray-100 file:px-3 file:py-2 file:text-sm file:font-medium hover:file:bg-gray-200"
+            className="mt-2 block w-full cursor-pointer rounded-lg border border-border bg-background/60 p-2 text-sm text-foreground file:mr-4 file:rounded-md file:border-0 file:bg-muted/80 file:px-3 file:py-2 file:text-sm file:font-medium file:text-foreground hover:file:bg-muted"
           />
         </div>
 
 
         {error && (
-          <div className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+          <div className="mt-4 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
             {error}
           </div>
         )}
 
-        <Button
-          onClick={handleSubmit}
-          disabled={!parsedData || isSubmitting}
-          className="mt-5 inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-400"
-        >
-          {isSubmitting ? "Sending..." : "Send Request"}
-        </Button>
-      </div>
+      <Button
+        onClick={handleSubmit}
+        disabled={!parsedData || isSubmitting}
+        className="mt-5 shadow-lift disabled:cursor-not-allowed"
+      >
+        {isSubmitting ? "Sending..." : "Send Request"}
+      </Button>
     </div>
-    </>
-    
   );
 }

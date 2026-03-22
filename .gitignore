@@ -33,6 +33,8 @@ dist/
 .env
 .env.*
 !.env.example
+!.env.demo
+!.env.development
 
 # IDE / editor
 .vscode/

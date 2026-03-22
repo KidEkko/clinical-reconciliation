@@ -1,0 +1,39 @@
+{
+  "patient_context": {
+    "age": 68,
+    "conditions": [
+      "Hypertension",
+      "Type 2 Diabetes",
+      "Hyperlipidemia"
+    ],
+    "recent_labs": {
+      "HbA1c": "7.2%",
+      "LDL": "95 mg/dL",
+      "blood_pressure": "138/82 mmHg",
+      "creatinine": "1.1 mg/dL"
+    }
+  },
+  "sources": [
+    {
+      "system": "Hospital EHR",
+      "medication": "Metformin 1000mg twice daily",
+      "last_updated": "2024-03-15T14:30:00Z",
+      "last_filled": "2024-03-10T09:00:00Z",
+      "source_reliability": "high"
+    },
+    {
+      "system": "Outpatient Clinic",
+      "medication": "Metformin 500mg twice daily",
+      "last_updated": "2024-02-20T10:15:00Z",
+      "last_filled": "2024-02-15T11:30:00Z",
+      "source_reliability": "medium"
+    },
+    {
+      "system": "Patient Self-Report",
+      "medication": "Metformin 1000mg BID",
+      "last_updated": "2024-03-14T16:45:00Z",
+      "last_filled": "2024-03-10T09:00:00Z",
+      "source_reliability": "medium"
+    }
+  ]
+}

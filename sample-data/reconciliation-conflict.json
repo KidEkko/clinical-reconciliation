@@ -1,0 +1,38 @@
+{
+  "patient_context": {
+    "age": 55,
+    "conditions": [
+      "Chronic Heart Failure",
+      "Atrial Fibrillation"
+    ],
+    "recent_labs": {
+      "INR": "2.3",
+      "potassium": "4.2 mEq/L",
+      "BNP": "450 pg/mL",
+      "ejection_fraction": "35%"
+    }
+  },
+  "sources": [
+    {
+      "system": "Cardiology Clinic",
+      "medication": "Warfarin 5mg daily",
+      "last_updated": "2024-03-18T11:00:00Z",
+      "last_filled": "2024-03-15T14:00:00Z",
+      "source_reliability": "high"
+    },
+    {
+      "system": "Primary Care",
+      "medication": "Apixaban 5mg twice daily",
+      "last_updated": "2024-03-10T09:30:00Z",
+      "last_filled": "2024-03-05T10:00:00Z",
+      "source_reliability": "high"
+    },
+    {
+      "system": "Pharmacy Record",
+      "medication": "Warfarin 5mg once daily",
+      "last_updated": "2024-03-17T16:20:00Z",
+      "last_filled": "2024-03-15T14:00:00Z",
+      "source_reliability": "high"
+    }
+  ]
+}

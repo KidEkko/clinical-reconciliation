@@ -1,9 +1,56 @@
+@layer components {
+  .shadow-lift {
+    transition: all 200ms;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  }
 
-.bShad {
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
-}
+  .shadow-lift:hover {
+    transform: translateY(-0.125rem);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  }
 
-.bShad:hover {
-  transform: translateY(2px);
-  box-shadow: 0 0.2rem 0.3rem rgb(0, 0, 0);
+  .panel-surface {
+    border-radius: 1rem;
+    border: 1px solid var(--color-border);
+    background-color: var(--color-card);
+    color: var(--color-card-foreground);
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    border: 1px solid rgb(from var(--color-border) r g b / 0.6);
+    background-color: rgb(from var(--color-muted) r g b / 0.7);
+    padding: 0.25rem 0.625rem;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 500;
+    color: var(--color-muted-foreground);
+  }
+
+  .tab-button {
+    border-radius: 1rem;
+    border: 1px solid var(--color-border);
+    background-color: rgb(from var(--color-muted) r g b / 0.6);
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 600;
+    color: var(--color-foreground);
+    transition: all 150ms;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  }
+
+  .tab-button:hover {
+    transform: translateY(-0.125rem);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    background-color: rgb(from var(--color-muted) r g b / 0.4);
+  }
+
+  .tab-button:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-ring);
+  }
 }
