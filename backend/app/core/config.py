@@ -9,6 +9,8 @@ class Settings:
 
     APP_API_KEY: str = os.getenv("APP_API_KEY", "dev-only-key")
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    HASH_SALT: str = os.getenv("HASH_SALT", "super-secret-hash-key")
+    APP_API_KEY_HASH: str = os.getenv("APP_API_KEY_HASH", "")
 
     CORS_ORIGINS: str = os.getenv(
         "CORS_ORIGINS",
