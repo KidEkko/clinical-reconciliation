@@ -2,6 +2,7 @@ from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
 from app.main import app
 from app.core.config import settings
+from app.utils.crypto import hash_api_key
 from tests.fixtures.clinical_data import (
     RECONCILE_REQUEST_CLEAR,
     RECONCILE_REQUEST_AGREEMENT,
@@ -12,6 +13,9 @@ from tests.fixtures.clinical_data import (
 
 
 client = TestClient(app)
+
+# Generate the valid API key hash for use in tests
+VALID_API_KEY_HASH = hash_api_key(settings.APP_API_KEY, settings.HASH_SALT)
 
 
 class TestHealthEndpoint:
@@ -65,7 +69,7 @@ class TestReconcileEndpointAuth:
             response = client.post(
                 "/api/reconcile/medication",
                 json=RECONCILE_REQUEST_CLEAR.model_dump(),
-                headers={"X-API-Key": settings.APP_API_KEY}
+                headers={"X-API-Key": VALID_API_KEY_HASH}
             )
             assert response.status_code == 200
 
@@ -84,7 +88,7 @@ class TestReconcileEndpointWithMock:
         response = client.post(
             "/api/reconcile/medication",
             json=RECONCILE_REQUEST_CLEAR.model_dump(),
-            headers={"X-API-Key": settings.APP_API_KEY}
+            headers={"X-API-Key": VALID_API_KEY_HASH}
         )
 
         assert response.status_code == 200
@@ -106,7 +110,7 @@ class TestReconcileEndpointWithMock:
         response = client.post(
             "/api/reconcile/medication",
             json=RECONCILE_REQUEST_AGREEMENT.model_dump(),
-            headers={"X-API-Key": settings.APP_API_KEY}
+            headers={"X-API-Key": VALID_API_KEY_HASH}
         )
 
         assert response.status_code == 200
@@ -128,7 +132,7 @@ class TestReconcileEndpointWithMock:
         response = client.post(
             "/api/reconcile/medication",
             json=RECONCILE_REQUEST_CLEAR.model_dump(),
-            headers={"X-API-Key": settings.APP_API_KEY}
+            headers={"X-API-Key": VALID_API_KEY_HASH}
         )
 
         assert response.status_code == 200
@@ -174,7 +178,7 @@ class TestDataQualityEndpointWithMock:
         response = client.post(
             "/api/validate/data-quality",
             json=DATA_QUALITY_COMPLETE.model_dump(),
-            headers={"X-API-Key": settings.APP_API_KEY}
+            headers={"X-API-Key": VALID_API_KEY_HASH}
         )
 
         assert response.status_code == 200
@@ -210,7 +214,7 @@ class TestDataQualityEndpointWithMock:
         response = client.post(
             "/api/validate/data-quality",
             json=DATA_QUALITY_MISSING_FIELDS.model_dump(),
-            headers={"X-API-Key": settings.APP_API_KEY}
+            headers={"X-API-Key": VALID_API_KEY_HASH}
         )
 
         assert response.status_code == 200
@@ -246,7 +250,7 @@ class TestDataQualityEndpointWithMock:
         response = client.post(
             "/api/validate/data-quality",
             json=DATA_QUALITY_IMPLAUSIBLE_VITALS.model_dump(),
-            headers={"X-API-Key": settings.APP_API_KEY}
+            headers={"X-API-Key": VALID_API_KEY_HASH}
         )
 
         assert response.status_code == 200
@@ -270,7 +274,7 @@ class TestDataQualityEndpointWithMock:
         response = client.post(
             "/api/validate/data-quality",
             json=DATA_QUALITY_COMPLETE.model_dump(),
-            headers={"X-API-Key": settings.APP_API_KEY}
+            headers={"X-API-Key": VALID_API_KEY_HASH}
         )
 
         assert response.status_code == 200
@@ -293,7 +297,7 @@ class TestErrorHandling:
         response = client.post(
             "/api/reconcile/medication",
             json=RECONCILE_REQUEST_CLEAR.model_dump(),
-            headers={"X-API-Key": settings.APP_API_KEY}
+            headers={"X-API-Key": VALID_API_KEY_HASH}
         )
 
         assert response.status_code == 503
@@ -307,7 +311,7 @@ class TestErrorHandling:
         response = client.post(
             "/api/reconcile/medication",
             json=RECONCILE_REQUEST_CLEAR.model_dump(),
-            headers={"X-API-Key": settings.APP_API_KEY}
+            headers={"X-API-Key": VALID_API_KEY_HASH}
         )
 
         assert response.status_code == 502
@@ -319,7 +323,7 @@ class TestErrorHandling:
         response = client.post(
             "/api/reconcile/medication",
             json=invalid_request,
-            headers={"X-API-Key": settings.APP_API_KEY}
+            headers={"X-API-Key": VALID_API_KEY_HASH}
         )
 
         assert response.status_code == 422

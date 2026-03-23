@@ -2,12 +2,14 @@ import pytest
 from fastapi import HTTPException, status
 from app.core.auth import require_api_key
 from app.core.config import settings
+from app.utils.crypto import hash_api_key
 
 
 class TestRequireApiKey:
     def test_valid_api_key(self):
-        result = require_api_key(settings.APP_API_KEY)
-        assert result == settings.APP_API_KEY
+        valid_hash = hash_api_key(settings.APP_API_KEY, settings.HASH_SALT)
+        result = require_api_key(valid_hash)
+        assert result == valid_hash
 
     def test_missing_api_key(self):
         with pytest.raises(HTTPException) as exc:
